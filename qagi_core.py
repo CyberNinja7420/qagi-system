@@ -24,6 +24,10 @@ class QAGICore:
         self.tasks_completed = 0
         self.ollama_url = "http://96.31.83.171:11434"
         self.quantum_url = "http://96.31.83.171:8900"
+        self.services_available = {
+            "ollama": False,
+            "quantum": False
+        }
 
     async def run_task(self, task_type: str, **kwargs):
         """Execute a task using available resources"""
@@ -64,6 +68,10 @@ class QAGICore:
 
     async def quantum_optimize(self, **kwargs):
         """Perform quantum optimization"""
+        if not self.services_available["quantum"]:
+            logger.info("Quantum API not available, skipping...")
+            return {"status": "skipped", "reason": "service_unavailable"}
+
         logger.info("Running quantum optimization...")
         try:
             response = requests.post(
@@ -94,6 +102,35 @@ class QAGICore:
             logger.error(f"LLM generation error: {e}")
             return {"status": "failed", "error": str(e)}
 
+    async def check_services(self):
+        """Check which services are available"""
+        logger.info("Checking service availability...")
+
+        # Check Ollama
+        try:
+            resp = requests.get(f"{self.ollama_url}/api/tags", timeout=5)
+            if resp.status_code == 200:
+                self.services_available["ollama"] = True
+                models = resp.json().get("models", [])
+                logger.info(f"✅ Ollama available with {len(models)} models")
+            else:
+                logger.warning(f"⚠️  Ollama responded with status {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"❌ Ollama not accessible: {e}")
+            self.services_available["ollama"] = False
+
+        # Check Quantum API
+        try:
+            resp = requests.get(f"{self.quantum_url}/health", timeout=5)
+            if resp.status_code == 200:
+                self.services_available["quantum"] = True
+                logger.info("✅ Quantum API available")
+            else:
+                logger.warning(f"⚠️  Quantum API responded with status {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"❌ Quantum API not accessible: {e}")
+            self.services_available["quantum"] = False
+
     async def monitor_system(self):
         """Monitor all system components"""
         logger.info("Monitoring system...")
@@ -122,6 +159,9 @@ class QAGICore:
         logger.info("Starting autonomous loop...")
         self.running = True
         self.start_time = datetime.now()
+
+        # Check service availability first
+        await self.check_services()
 
         task_cycle = [
             ("system_monitor", {}),
