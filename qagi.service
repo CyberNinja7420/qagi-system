@@ -1,0 +1,16 @@
+[Unit]
+Description=QAGI - Quantum GPU-Accelerated General Intelligence
+After=network.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$(pwd)
+ExecStart=/usr/bin/python3 $(pwd)/qagi_core.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/qagi/qagi.log
+StandardError=append:/var/log/qagi/qagi.error.log
+
+[Install]
+WantedBy=multi-user.target
