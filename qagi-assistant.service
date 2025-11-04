@@ -1,0 +1,16 @@
+[Unit]
+Description=QAGI Virtual Assistant Interface
+After=network.target qagi.service
+
+[Service]
+Type=simple
+User=claudehome
+WorkingDirectory=/home/claudehome/claude-workspace/projects/qagi-system
+ExecStart=/usr/bin/python3 /home/claudehome/claude-workspace/projects/qagi-system/qagi_assistant.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/qagi/assistant.log
+StandardError=append:/var/log/qagi/assistant.error.log
+
+[Install]
+WantedBy=multi-user.target

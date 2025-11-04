@@ -1,16 +1,26 @@
 #!/bin/bash
 
 echo "======================================================================"
-echo "Installing QAGI Services"
+echo "Installing QAGI Complete System"
 echo "======================================================================"
+echo
+
+# Check dependencies
+echo "Checking dependencies..."
+python3 -c "import fastapi, uvicorn, websockets" 2>/dev/null || {
+    echo "Installing required Python packages..."
+    pip3 install fastapi uvicorn websockets --quiet
+}
 echo
 
 # Stop existing services if running
 echo "Stopping existing services (if any)..."
 sudo systemctl stop qagi.service 2>/dev/null || true
 sudo systemctl stop qagi-dashboard.service 2>/dev/null || true
+sudo systemctl stop qagi-assistant.service 2>/dev/null || true
 sudo systemctl disable qagi.service 2>/dev/null || true
 sudo systemctl disable qagi-dashboard.service 2>/dev/null || true
+sudo systemctl disable qagi-assistant.service 2>/dev/null || true
 echo
 
 # Create log directory
@@ -23,6 +33,7 @@ echo
 echo "Installing service files..."
 sudo cp qagi.service /etc/systemd/system/
 sudo cp qagi-dashboard.service /etc/systemd/system/
+sudo cp qagi-assistant.service /etc/systemd/system/
 echo
 
 # Reload systemd
@@ -34,13 +45,21 @@ echo
 echo "Enabling services..."
 sudo systemctl enable qagi.service
 sudo systemctl enable qagi-dashboard.service
+sudo systemctl enable qagi-assistant.service
 echo
 
 # Start services
 echo "Starting services..."
+echo "  1. QAGI Core (autonomous system)..."
 sudo systemctl start qagi.service
-sleep 2
+sleep 3
+
+echo "  2. QAGI Dashboard (port 9200)..."
 sudo systemctl start qagi-dashboard.service
+sleep 2
+
+echo "  3. QAGI Virtual Assistant (port 9300)..."
+sudo systemctl start qagi-assistant.service
 sleep 2
 echo
 
@@ -49,24 +68,32 @@ echo "======================================================================"
 echo "Service Status:"
 echo "======================================================================"
 echo
-echo "QAGI Core:"
-sudo systemctl status qagi.service --no-pager -l | head -15
+
+echo "▶ QAGI Core (24/7 Autonomous System):"
+sudo systemctl is-active qagi.service && echo "  ✅ Running" || echo "  ❌ Not running"
 echo
-echo "QAGI Dashboard:"
-sudo systemctl status qagi-dashboard.service --no-pager -l | head -15
+
+echo "▶ QAGI Dashboard:"
+sudo systemctl is-active qagi-dashboard.service && echo "  ✅ Running" || echo "  ❌ Not running"
+echo
+
+echo "▶ QAGI Virtual Assistant:"
+sudo systemctl is-active qagi-assistant.service && echo "  ✅ Running" || echo "  ❌ Not running"
 echo
 
 echo "======================================================================"
 echo "Installation Complete!"
 echo "======================================================================"
 echo
-echo "Monitor services:"
-echo "  sudo systemctl status qagi"
-echo "  sudo systemctl status qagi-dashboard"
+echo "📊 Dashboards:"
+echo "   • Main Dashboard:     http://localhost:9200"
+echo "   • Virtual Assistant:  http://localhost:9300"
 echo
-echo "View logs:"
-echo "  sudo journalctl -u qagi -f"
-echo "  tail -f /var/log/qagi/qagi.log"
+echo "🔧 Management Commands:"
+echo "   • Status:  sudo systemctl status qagi"
+echo "   • Logs:    sudo journalctl -u qagi -f"
+echo "   • Stop:    sudo systemctl stop qagi qagi-dashboard qagi-assistant"
+echo "   • Start:   sudo systemctl start qagi qagi-dashboard qagi-assistant"
 echo
-echo "Dashboard: http://localhost:9200"
+echo "🤖 QAGI is now running 24/7!"
 echo
