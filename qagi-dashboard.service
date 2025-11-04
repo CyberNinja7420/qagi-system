@@ -1,14 +1,16 @@
 [Unit]
 Description=QAGI Dashboard
-After=network.target
+After=network.target qagi.service
 
 [Service]
 Type=simple
-User=$USER
-WorkingDirectory=$(pwd)
-ExecStart=/usr/bin/python3 $(pwd)/qagi_dashboard.py
+User=claudehome
+WorkingDirectory=/home/claudehome/claude-workspace/projects/qagi-system
+ExecStart=/usr/bin/python3 /home/claudehome/claude-workspace/projects/qagi-system/qagi_dashboard.py
 Restart=always
 RestartSec=10
+StandardOutput=append:/var/log/qagi/dashboard.log
+StandardError=append:/var/log/qagi/dashboard.error.log
 
 [Install]
 WantedBy=multi-user.target

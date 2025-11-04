@@ -220,15 +220,13 @@ async def main():
 
     # Start autonomous loop
     try:
-        loop_task = asyncio.create_task(qagi.autonomous_loop())
-        
-        # Run for demo duration (60 seconds)
-        await asyncio.sleep(60)
-        
-        # Stop and show stats
+        # Run indefinitely for 24/7 operation
+        await qagi.autonomous_loop()
+
+    except KeyboardInterrupt:
+        print("\n\nStopping QAGI...")
         qagi.stop()
-        await loop_task
-        
+
         stats = qagi.get_stats()
         print("\n" + "="*70)
         print("QAGI STATISTICS")
@@ -237,10 +235,6 @@ async def main():
         print(f"Tasks Completed: {stats['tasks_completed']}")
         print(f"Tasks/Hour: {stats['tasks_per_hour']:.1f}")
         print("="*70)
-
-    except KeyboardInterrupt:
-        print("\n\nStopping QAGI...")
-        qagi.stop()
 
 
 if __name__ == "__main__":

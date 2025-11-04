@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Type=simple
-User=$USER
-WorkingDirectory=$(pwd)
-ExecStart=/usr/bin/python3 $(pwd)/qagi_core.py
+User=claudehome
+WorkingDirectory=/home/claudehome/claude-workspace/projects/qagi-system
+ExecStart=/usr/bin/python3 /home/claudehome/claude-workspace/projects/qagi-system/qagi_core.py
 Restart=always
 RestartSec=10
 StandardOutput=append:/var/log/qagi/qagi.log
